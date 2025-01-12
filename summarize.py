@@ -178,6 +178,7 @@ async def generate_summary(context):
     - Highlight the most important points or key information from the text, use **bold**, *italic* ***other*** for this.
     - the summary is well formated in markdown but not be given in this format ```markdown\n content    ``` 
     - Dont mention **The text discusses, The Provided text discusses..., Introduction, Outro, etc. in the summary. It should be direct**
+    - Ensure to seperate topics if you get multiple topic and they are not related
     """
 
     prompt = f"""

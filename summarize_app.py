@@ -116,50 +116,15 @@ async def main():
             store_unsummarized = DeepLakeVectorStore(
                 dataset_path=os.path.join(deeplake_dir, "Deeplake_unsummarized"), overwrite=True
             )
-
             
-            col1, col2 = st.columns(2)
+            overall_chunks = []
+            for chunk in modules_for_summary:
+                sub_chunks = await chunk_text(chunk, chunk_size=1000, overlap=50)
+                overall_chunks.extend(sub_chunks)
 
-    # Accept button handling
-            with col1:
-                if st.button("Accept"):
-                    st.toast("Storing data...")
-                    overall_chunks = []
-                    for chunk in modules_for_summary:
-                        sub_chunks = await chunk_text(chunk, chunk_size=1000, overlap=50)
-                        overall_chunks.extend(sub_chunks)
-
-                    nodes = await async_create_nodes(overall_chunks)
-                    await store_unsummarized.async_add(nodes)
-                    st.success("Summary accepted and data stored successfully!")
-                
-    # Reject button handling
-            if "feedback_mode" not in st.session_state:
-                st.session_state.feedback_mode = False
-
-            with col2:
-                if st.button("Reject"):
-                    print("Reject button clicked")
-                    st.session_state.feedback_mode = True  # Enable feedback mode
-
-                    if st.session_state.feedback_mode:
-                        feedback = st.text_area(
-                            "Enter Feedback", placeholder="Provide feedback to refine the summary..."
-                        )
-                    
-                    if st.button("Submit Feedback"):
-                        if feedback.strip():
-                            st.toast("Retrying summarization with feedback...")
-                            updated_summary = retry_summary_update(
-                                st.session_state['summary'],
-                                feedback_from_user=feedback,
-                                additional_context=sumarized_chunks_corpus
-                            )
-                            st.session_state['summary'] = updated_summary
-                            st.session_state.feedback_mode = False  # Exit feedback mode
-                            st.write("Updated Summary:", st.session_state['summary'])
-                        else:
-                            st.error("Please provide feedback to refine the summary.")
+            nodes = await async_create_nodes(overall_chunks)
+            await store_unsummarized.async_add(nodes)
+            st.success("Documents processed and summarized successfully!")
 import asyncio
 
 asyncio.run(main())

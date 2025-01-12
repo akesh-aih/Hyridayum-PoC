@@ -123,6 +123,7 @@ def chatbot(
             )
         print("Messages are now", messages) 
         
+        
     # c:\Users\akliv\OneDrive\Desktop\Akesh kumar\POC\Doc_summarize_and_chat\assets\user-test_global\deeplake\Deeplake_unsummarized'
 
     # c:\\Users\\akliv\\OneDrive\\Desktop\\Akesh kumar\\POC\\Doc_summarize_and_chat\\assets\\user-user-test_global\\deeplake\\Deeplake_unsummarized
