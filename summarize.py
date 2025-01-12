@@ -325,3 +325,5 @@ async def main(**kwargs):
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+# python summarize.py --uuid id12423 --document_paths "C:\Users\akliv\OneDrive\Desktop\Akesh kumar\POC\Doc_summarize_and_chat\assets\user-test_global\content\longrag.pdf" "C:\Users\akliv\OneDrive\Desktop\Akesh kumar\POC\Doc_summarize_and_chat\assets\user-test_global\content\longrag.pdf"

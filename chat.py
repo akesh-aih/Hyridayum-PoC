@@ -230,3 +230,5 @@ if __name__ == "__main__":
     import asyncio
 
     asyncio.run(main())
+
+# python chat.py --uuid id12423 --query "What is the purpose of this document?" chat_with document|summary
