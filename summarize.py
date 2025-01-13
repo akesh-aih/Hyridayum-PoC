@@ -35,6 +35,7 @@ import os
 def create_user_directories(root, uuid):
     directories_to_create = [
         f"user-{uuid}",
+        
         "deeplake",
         "summaries",
         "content",

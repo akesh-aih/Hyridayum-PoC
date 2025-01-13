@@ -27,6 +27,7 @@ azure_embedding = AzureOpenAIEmbedding(
     azure_deployment="text-embedding-3-small",
 )
 
+from summarize_app import main as summmarizer_main
 
 def chat_bot(messages):
     client = AzureOpenAIModel(
@@ -78,6 +79,8 @@ if "chat_history" not in st.session_state:
     Provide accurate and reliable information
     Do not provide false or misleading information
     Always answer from the facts given to you as input like summary, reference text. Dont answer out of context.
+    
+    Always focus on user query for answer
     """
     st.session_state.chat_history = [{"role": "system", "content": system_prompt}]
     st.session_state.display_chat_history = []
@@ -105,56 +108,73 @@ async def main():
     if uuid != st.session_state.user_id:
         st.success("Username updated to: " + uuid)
         st.session_state.user_id = uuid
-    
+
     root = os.path.dirname(os.path.abspath(__file__))
     user_dir = os.path.join(root, "assets", f"user-{st.session_state.user_id}")
     deeplake_dir = os.path.join(user_dir, "deeplake")
-    
 
-        
     # uuid = st.sidebar.text_input("Enter username", "akeshkumar")
     if not uuid:
         st.error("Please enter a username.")
     else:
-        
         chat_with = st.sidebar.selectbox(
             "Select a chat option", ["summary", "document"]
         )
+        summaries_dir = os.path.join(
+            "assets", f"user-{st.session_state.user_id}", "summaries"
+        )
         
-            
+        if os.path.exists(summaries_dir):
+        
+            docs_path = read_json(  
+                os.path.join(summaries_dir, "summary.json"))[-1]["metadata"]["documents"]
+            for doc in docs_path:
+                file_name = os.path.basename(doc)
+                st.sidebar.download_button(
+                            label=f"Download {file_name}",
+                            file_name=file_name,
+                            data=open(doc, "rb").read(),
+                        )
 
         # Handle chat history and user query
         user_query = st.chat_input("Type your message here...")
 
         show_chat_from = 1
+        
         if chat_with == "summary":
-            summaries_dir = os.path.join(
-                "assets", f"user-{st.session_state.user_id}", "summaries"
-            )
             if not os.path.exists(os.path.join(summaries_dir, "summary.json")):
                 st.error("Please process the documents first.")
             else:
-                
                 if "summary" not in st.session_state:
-                    st.session_state["summary"] = read_json(
+                    summary_dict = read_json(
                         os.path.join(summaries_dir, "summary.json")
-                    )[-1]["summary"]
-                    # st.session_state.chat_history.append({
-                    #     "role": "user",
-                    #     "content": "## **Summary:** \n " + st.session_state["summary"]
-                    # })
+                    )
+                    print("summary dict", summary_dict)
+                    st.session_state["summary"] = summary_dict[-1]["summary"]
+                    st.session_state["current_docs"] = summary_dict[-1]["metadata"][
+                        "documents"
+                    ]
+
+
                     message = {
                         "role": "assistant",
                         "content": f"This is the summary {st.session_state['summary']}. \n\n How can I help you?",
                     }
                     st.session_state.chat_history.append(message)
                     st.session_state.display_chat_history.append(message)
+                # for doc in st.session_state["current_docs"]:
+                #     file_name = os.path.basename(doc)
+                #     st.sidebar.download_button(
+                #         label=f"Download {file_name}",
+                #         file_name=file_name,
+                #         data=open(doc, "rb").read(),
+                #     )
 
         elif chat_with == "document":
             st.session_state["vector_store"] = DeepLakeVectorStore(
-                    dataset_path=os.path.join(deeplake_dir, "Deeplake_unsummarized"),
-                    overwrite=False,
-                    verbose=True,
+                dataset_path=os.path.join(deeplake_dir, "Deeplake_unsummarized"),
+                overwrite=False,
+                verbose=True,
             )
             print("Vector store initialized.")
             print(st.session_state["vector_store"])
@@ -164,7 +184,13 @@ async def main():
             }
             st.session_state.chat_history.append(message)
             st.session_state.display_chat_history.append(message)
-
+            # for doc in st.session_state["current_docs"]:
+            #     file_name = os.path.basename(doc)
+            #     st.sidebar.download_button(
+            #             label=f"Download {file_name}",
+            #             file_name=file_name,
+            #             data=open(doc, "rb").read(),
+            #         )
             # else :
             #     retrived_text = None
             #     st.warning('Please enter a query')
@@ -181,13 +207,13 @@ async def main():
                 )
                 query_results = st.session_state.vector_store.query(vs_query)
                 retrived_text = "\n".join([node.text for node in query_results.nodes])
-                
-                print("retrived_text",retrived_text)
 
-                prompt = f"As a assistant you will provide a chatbot-like response to the User, Query:{user_query}  Reference Context: {retrived_text}, Take this reference context into account while responding."
+                # print("retrived_text",retrived_text)
+
+                prompt = f"As a assistant you will provide a chatbot-like response to the User, Query: {user_query}  Reference Context: {retrived_text}, Take this reference context into account while responding."
 
             elif chat_with == "summary":
-                prompt = f"As a assistant you will provide a chatbot-like response to the User, Query: {user_query} "
+                prompt = f"As a assistant you will provide a chatbot-like response to the User, Query: {user_query} from the summary "
 
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             st.session_state.display_chat_history.append(
@@ -214,5 +240,4 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
-
     asyncio.run(main())

@@ -99,6 +99,7 @@ async def main():
                     "summary": summary,
                     "metadata": {
                         "timetaken": time.time() - starttime,
+                        "documents": document_paths
                     },
                     "Retry": 5,
                     "feedback": ''
@@ -125,6 +126,7 @@ async def main():
             nodes = await async_create_nodes(overall_chunks)
             await store_unsummarized.async_add(nodes)
             st.success("Documents processed and summarized successfully!")
-import asyncio
+if __name__ == "__main__":
+    import asyncio
 
-asyncio.run(main())
+    asyncio.run(main())
