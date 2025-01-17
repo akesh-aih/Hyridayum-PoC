@@ -18,7 +18,7 @@ from source.utils import read_json, write_json
 from source.vector_store.embedding import query_text_embedding
 from aih_rag.schema import TextNode
 from aih_rag.vector_stores import VectorStoreQuery
-
+from source.logger import logger
 TOP_K = 4
 
 load_dotenv()
@@ -154,6 +154,7 @@ async def main():
 
     parser = ArgumentParser()
     parser.add_argument("--uuid", type=str, required=True)
+    parser.add_argument("--unique_content_id", type=str, required=True)
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--chat_with", type=str, required=True)  # summary/document
 

@@ -14,6 +14,7 @@ azure_model_text = AzureOpenAIModel(
     azure_endpoint=azure_endpoint,
     azure_api_key=azure_api_key,
     azure_api_version=azure_api_version,
+    parameters={"model":'gpt-35-turbo'}
     # azure_engine=azure_engine
 )
 

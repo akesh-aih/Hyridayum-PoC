@@ -3,6 +3,7 @@ from logging import Logger
 from functools import wraps
 import asyncio
 import random
+import sys
 async def chunk_text(text, chunk_size=1000, overlap=100):
     """Split text into overlapping chunks."""
     chunks = []
@@ -37,9 +38,11 @@ def retry_async(
                 try:
                     return await func(*args, **kwargs)
                 except exceptions as e:
-                    message = f"Attempt {attempt + 1} Failed. {e} Trying again in {exp_delay} seconds"
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = exc_tb.tb_frame.f_code.co_filename
+                    message = f"Attempt {attempt + 1} Failed, line no. {exc_tb.tb_lineno}, {exc_type}, {fname}. Error: {e} Trying again in {exp_delay} seconds"
+                   
                     if logger:
-                        
                         logger.critical(message)
                     else:
                         print(message)
@@ -104,3 +107,29 @@ def retry_sync(
         return wrapper
 
     return decorator
+import os
+from  aih_rag.readers.file.docs_reader import PDFReader, DocxReader
+from aih_rag.readers.file.markdown_reader import MarkdownReader
+
+
+def create_user_directories(root, uuid,session_id):
+    directories_to_create = [        
+        "deeplake",
+        "summaries",
+        "content",
+        "chat",
+        "chat/doc",
+        "chat/summary",
+        "systems"
+    ]
+    user_dir = os.path.join(root, "assets", f"u-{uuid}",f"s-{session_id}")
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)
+
+    for directory in directories_to_create:
+        path = os.path.join(user_dir, directory)
+        if not os.path.exists(path):
+            os.makedirs(path)
+            
+
+

@@ -2,3 +2,5 @@ assets
 .env
 test.py
 **/__pycache__/
+.venv
+.logs

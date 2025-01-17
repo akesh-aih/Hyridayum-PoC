@@ -4,7 +4,8 @@ import asyncio
 import random
 import time
 import json
-
+import os 
+import sys
 def retry_async(
     exceptions: tuple = (Exception,),
     retries=3,
@@ -30,9 +31,12 @@ def retry_async(
                 try:
                     return await func(*args, **kwargs)
                 except exceptions as e:
-                    message = f"Attempt {attempt + 1} Failed. {e} Trying again in {exp_delay} seconds"
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                    
+                    message = f"Attempt {attempt + 1} Failed, Error: {e}  {exc_type} {exc_tb.tb_frame.f_code.co_filename}:{exc_tb.tb_lineno}.  Trying again in {exp_delay} seconds"
+                    
                     if logger:
-                        
                         logger.critical(message)
                     else:
                         print(message)
