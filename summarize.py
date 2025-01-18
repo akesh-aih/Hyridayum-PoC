@@ -328,7 +328,7 @@ if __name__ == "__main__":
         doc_details = {
             "path": document_paths[i],
             "unique_content_id": str(uuid4()),
-            "status": False,
+            "status": None,
             "start_time": start_time.timestamp(),
             "end_time": None,
             "duration": None,
